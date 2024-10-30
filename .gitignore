@@ -233,3 +233,6 @@ devenv.local.nix
 
 # pre-commit
 .pre-commit-config.yaml
+
+# Example model
+example/backbone_fc.onnx

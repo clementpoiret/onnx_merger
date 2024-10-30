@@ -1,51 +1,55 @@
-# Nix Python Devenv
+# ONNX Model Merger
 
-A Python development environment template using [devenv](https://devenv.sh) with working C bindings,
-managed by [uv](https://docs.astral.sh/uv/) package manager.
+A tool to merge ONNX models, specifically designed to combine a backbone with its head while maintaining proper node connections.
 
-A version of this repo with CUDA is available on the
-[cuda branch](https://github.com/clementpoiret/nix-python-devenv/tree/cuda).
+This is purely a proof of concept, not a all production-ready.
 
 ## Features
 
-- CUDA toolkit and CUDNN support (see the `cuda` branch)
-- Python 3.x environment
-- Fast package management with uv
-- Automatic environment activation with direnv
-- Example script using numpy
+- Merges two ONNX models (backbone and head)
+- Automatically handles node name prefixing to avoid conflicts
+- Includes model simplification using ONNX-Simplifier
+- Configurable input/output node mapping
 
 ## Installation
 
-1. Install [Nix](https://nixos.org/download/):
+The project uses [devenv](https://devenv.sh) with [uv](https://docs.astral.sh/uv/) package manager.
+
+0. Install Nix and Devenv (and maybe direnv if you want).
+
+1. Optional if you have `direnv` - Enter in the devenv shell:
    ```bash
-   sh <(curl -L https://nixos.org/nix/install) --daemon
+   devenv shell
    ```
 
-2. Install [devenv](https://devenv.sh/)
+2. Sync the dependencies if needed:
    ```bash
-   nix-env -iA devenv -f https://github.com/NixOS/nixpkgs/tarball/nixpkgs-unstable
-   ```
-
-3. Install [direnv](https://direnv.net/) (optional but recommended)
-
-4. Clone and setup:
-   ```bash
-   git clone --single-branch --branch cuda git@github.com:clementpoiret/nix-python-devenv.git
-
-   # Allow direnv to manage the environment
-   direnv allow
+   uv sync
    ```
 
 ## Usage
 
-The environment automatically:
-- Activates the Python virtual environment
-- Sets up LD_LIBRARY_PATH
-- Provides the `hello` command to test C Bindings
+The merger tool takes two ONNX models as input and combines them:
 
-Run the sample script:
 ```bash
-hello
+python merger.py <backbone_model.onnx> <head_model.onnx> [options]
 ```
 
-This will display the output of numpy functions.
+If you are not the the environment, you may want to use:
+
+```bash
+uv run python merger.py
+```
+
+### Options
+
+- `-o`, `--out_node_name`: Output node name from the backbone (default: "Identity_1:0")
+- `-i`, `--in_node_name`: Input node name for the head (default: "args_tf_0")
+
+### Example
+
+```bash
+uv run python merger.py example/backbone.onnx example/fc.onnx
+```
+
+The merged model will be saved as `<backbone_name>_<head_name>.onnx` in the same directory as the backbone model.
